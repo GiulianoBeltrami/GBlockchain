@@ -1,21 +1,16 @@
-require("@nomiclabs/hardhat-waffle");
+//Kovan network(network address) -> https://eth-kovan.alchemyapi.io/v2/c32eAfs0_riG5H1hLXyBhXoEr2fQViU8
+//Account founded the deploy -> 6fe98aafdce83dcfb06d364137a320fc0c23dcf5aac68f7ac0e76ec331b4fcbd
+//Deployed(contract address) -> 0xeF7284877bDC8A35D95d2DE3DC554EC13Df70333
+//DeployedV2 -> 0x95c279b8DDfe90B78C7c325B8651008B3920F7ad
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
+require('@nomiclabs/hardhat-waffle');
 
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-// You need to export an object to set up your config
-// Go to https://hardhat.org/config/ to learn more
-
-/**
- * @type import('hardhat/config').HardhatUserConfig
- */
 module.exports = {
-  solidity: "0.8.4",
-};
+  solidity:'0.8.0',
+  networks:{
+    kovan:{
+      url: 'https://eth-kovan.alchemyapi.io/v2/kLygicR0wQfOvzxhLw8f7mMy2BLkSXBD',
+      accounts:['d53e0106095b96eece78986d4c65f0fff0098bd808a34b2afa13c780dfac6618']
+    }
+  }
+}
