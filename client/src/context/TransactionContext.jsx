@@ -56,6 +56,8 @@ export const TransactionProvider = ({ children }) => {
 
     }
 
+    
+
     const connectWallet = async () => {
         try {
             checkIfMetamaskIsInstalled();
