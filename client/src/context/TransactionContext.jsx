@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 
-// Erro no contrato -> transfere mas retorna to many arguments
 import { contractABI, contractAddress } from '../utils/Constants';
 
 export const TransactionContext = React.createContext();
@@ -20,12 +19,39 @@ export const TransactionProvider = ({ children }) => {
 
     const [currentAccount, setCurrentAccount] = useState("");
     const [formData, setFormData] = useState({ addressTo: "", amount: "", keyword: "", message: "" });
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading,setIsLoading] = useState(true);
     const [transactionCount,setTransactionCount] = useState(localStorage.getItem("transactionCount"));
+    const [transactions,setTransactions] = useState([]);
 
 
     const handleChange = (event, name) => {
         setFormData((previusState) => ({ ...previusState, [name]: event.target.value }));
+    }
+
+    const getAllTransactions = async () => {
+        try {
+            if(ethereum){
+                checkIfMetamaskIsInstalled();
+                const transactionContract = getEthereumContract();
+                const availableTransactions = await transactionContract.getAllTransactions();
+                const structuredTransactions = availableTransactions.map((transaction) => ({
+                    addressTo: transaction.receiver,
+                    addressFrom: transaction.sender,
+                    timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
+                    message: transaction.message,
+                    keyword:transaction.keyword,
+                    amount: parseInt(transaction.amount._hex) / (10**18)
+    
+                }));
+                setTransactions(structuredTransactions);
+            }
+            else{
+                console.log("Ethereum is not present, you installed metamask?");
+            }
+            
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const checkIfMetamaskIsInstalled = () => {
@@ -35,6 +61,7 @@ export const TransactionProvider = ({ children }) => {
     const checkIfWalletIsConnected = async () => {
 
         try {
+            setIsLoading(true);
             checkIfMetamaskIsInstalled();
 
             const accounts = await ethereum.request({
@@ -42,12 +69,13 @@ export const TransactionProvider = ({ children }) => {
             });
 
             if (accounts.length) {
+                
                 setCurrentAccount(accounts[0]);
-
-                //getAllTransactions();
+                await getAllTransactions();
+                setIsLoading(false);
             }
             else {
-                console.error("No accounts found.")
+                console.error("No accounts found.");
             }
         } catch (error) {
             throw new Error("No ethereum object.");
@@ -56,7 +84,17 @@ export const TransactionProvider = ({ children }) => {
 
     }
 
-    
+    const checkIfTransactionExists = async () => {
+        try {
+            const transactionContract = getEthereumContract();
+            const transactionCount = await transactionContract.getTransactionCount();
+
+            window.localStorage.setItem('transactionCount',transactionCount);
+        } catch (error) {
+            console.error(error);
+            throw new Error("No ethereum object.");
+        }
+    }
 
     const connectWallet = async () => {
         try {
@@ -104,6 +142,7 @@ export const TransactionProvider = ({ children }) => {
             const transactionCount = await transactionContract.getTransactionCount();
             setTransactionCount(transactionCount.toNumber());
 
+            window.reload();
         } catch (error) {
             console.error(error);
             throw new Error("No ethereum object.");
@@ -113,10 +152,11 @@ export const TransactionProvider = ({ children }) => {
 
     useEffect(() => {
         checkIfWalletIsConnected();
+        checkIfTransactionExists();
     }, []);
 
     return (
-        <TransactionContext.Provider value={{ connectWallet, currentAccount, formData, handleChange, sendTransaction }}>
+        <TransactionContext.Provider value={{ connectWallet, currentAccount, formData, handleChange, sendTransaction, transactions, isLoading }}>
             {children}
         </TransactionContext.Provider>
     );
