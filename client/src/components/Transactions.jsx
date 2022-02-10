@@ -4,7 +4,6 @@ import { TransactionContext } from "../context/TransactionContext";
 
 import { shortenAddress } from '../utils/shortenAddress';
 import useFetch from '../Hooks/useFetch';
-import Loader from './Loader';
 
 const TransactionCard = ({ addressTo, addressFrom, timestamp, message, keyword, amount, url }) => {
   const gifUrl = useFetch({ keyword });
@@ -46,11 +45,8 @@ const TransactionCard = ({ addressTo, addressFrom, timestamp, message, keyword, 
 }
 
 const Transactions = () => {
-  const { currentAccount, transactions, isLoading } = useContext(TransactionContext);
+  const { currentAccount, transactions } = useContext(TransactionContext);
 
-  if (isLoading) {
-    return (<Loader />)
-  }
   return (
     <div className="flex w-full justify-center items-center 2xl:px-20 gradient-bg-transactions">
       <div className="flex flex-col md:p-12 py-12 px-4">

@@ -19,7 +19,7 @@ export const TransactionProvider = ({ children }) => {
 
     const [currentAccount, setCurrentAccount] = useState("");
     const [formData, setFormData] = useState({ addressTo: "", amount: "", keyword: "", message: "" });
-    const [isLoading,setIsLoading] = useState(true);
+    const [isLoading,setIsLoading] = useState(false);
     const [transactionCount,setTransactionCount] = useState(localStorage.getItem("transactionCount"));
     const [transactions,setTransactions] = useState([]);
 
@@ -61,7 +61,6 @@ export const TransactionProvider = ({ children }) => {
     const checkIfWalletIsConnected = async () => {
 
         try {
-            setIsLoading(true);
             checkIfMetamaskIsInstalled();
 
             const accounts = await ethereum.request({
@@ -72,7 +71,6 @@ export const TransactionProvider = ({ children }) => {
                 
                 setCurrentAccount(accounts[0]);
                 await getAllTransactions();
-                setIsLoading(false);
             }
             else {
                 console.error("No accounts found.");
